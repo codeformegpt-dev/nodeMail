@@ -1,14 +1,10 @@
-import express from "express";
-import bodyParser from "body-parser";
-import nodemailer from "nodemailer";
-import path from "path";
-import { fileURLToPath } from "url";
+const express = require("express");
+const bodyParser = require("body-parser");
+const nodemailer = require("nodemailer");
+const path = require("path");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // מסלול שמחזיר את הטופס
 app.get("/", (req, res) => {
@@ -26,7 +22,7 @@ app.post("/contact", async (req, res) => {
       service: "gmail",
       auth: {
         user: "codeformegpt@gmail.com", // כתובת המייל שלך
-        pass: "plnhyagoqawnotsx"      // סיסמת אפליקציה מיוחדת, לא הסיסמה הרגילה
+        pass: "plnhyagoqawnotsx"  // סיסמת אפליקציה מיוחדת
       }
     });
 
@@ -35,7 +31,7 @@ app.post("/contact", async (req, res) => {
       from: "codeformegpt@gmail.com",
       to: email,
       subject: "תודה על הפנייה שלך",
-      text: "קיבלנו את המייל שלך ונחזור אליך בהקדם."
+      text: "הנה הקישור לצפייה באתר שלנו: https://readdy.link/preview/e852898e-2322-4f90-9583-2473e004832c/2178168"
     });
 
     res.send("המייל נשלח בהצלחה ל: " + email);
@@ -45,4 +41,5 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("השרת רץ על http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`השרת רץ על http://localhost:${PORT}`));
