@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       from: "codeformegpt@gmail.com",
       to: email,
       subject: "תודה על הפנייה שלך",
-      text: "קיבלנו את המייל שלך ונחזור אליך בהקדם."
+      text: "הנה הקישור לאתר: https://readdy.link/preview/e852898e-2322-4f90-9583-2473e004832c/2178168"
     });
 
     res.status(200).json({ message: "המייל נשלח בהצלחה ל: " + email });
