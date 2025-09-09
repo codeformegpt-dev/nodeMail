@@ -2,14 +2,41 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>צור קשר</title>
+  <title>שליחת מייל</title>
 </head>
 <body>
-  <h2>צור קשר</h2>
-  <form action="/contact" method="POST">
-    <label for="email">כתובת אימייל:</label>
-    <input type="email" id="email" name="email" required>
+  <h1>שלח מייל</h1>
+  <form id="contactForm">
+    <input type="email" id="email" placeholder="מייל" required>
     <button type="submit">שלח</button>
   </form>
+  <p id="result"></p>
+
+  <script>
+    const form = document.getElementById("contactForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+
+      try {
+        const response = await fetch("/api/sendMail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          result.textContent = data.message;
+        } else {
+          result.textContent = "שגיאה: " + data.error;
+        }
+      } catch (err) {
+        result.textContent = "שגיאה ברשת";
+      }
+    });
+  </script>
 </body>
 </html>

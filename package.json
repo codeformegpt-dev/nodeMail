@@ -1,18 +1,15 @@
 {
-  "name": "makeemails",
+  "name": "makeEmails",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "שליחת מיילים דרך Vercel Serverless Functions",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "vercel dev",
+    "start": "vercel dev"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "codeformegpt",
+  "license": "MIT",
   "dependencies": {
-    "body-parser": "^2.2.0",
-    "express": "^5.1.0",
-    "nodemailer": "^7.0.6"
+    "nodemailer": "^6.9.4"
   }
 }
