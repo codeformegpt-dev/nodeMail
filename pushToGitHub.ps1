@@ -1,7 +1,7 @@
 # בדוק אם כבר מחובר ל-remote
 $remote = git remote -v
 if (-not $remote) {
-    git remote add origin https://github.com/codeformegpt-dev/nodeMail.git
+    git remote add origin https://github.com/avrahambnm/nodeMail.git
 }
 
 # ודא שאתה על main

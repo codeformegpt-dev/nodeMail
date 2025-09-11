@@ -1,21 +1,22 @@
 {
   "name": "makeEmails",
   "version": "1.0.0",
+  "description": "Local email subscription project",
   "type": "module",
-  "description": "שליחת מיילים דרך Vercel Serverless Functions",
-  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "backend": "node backend/service.js",
+    "frontend": "live-server frontend --port=5500",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
   },
-  "author": "codeformegpt",
-  "license": "MIT",
   "dependencies": {
-    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
-    "express": "^5.1.0",
-    "nodemailer": "^6.10.1",
-    "uuid": "^13.0.0"
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.4"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "live-server": "^1.2.2"
   }
 }
+ 

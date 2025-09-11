@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גלו את הכוח של קריאת שמע ישראל</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#4F46E5',
+secondary: '#7C3AED'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+},
+fontFamily: {
+'hebrew': ['Heebo', 'sans-serif']
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+body {
+font-family: 'Heebo', sans-serif;
+}
+.gradient-bg {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.fade-in {
+opacity: 0;
+transform: translateY(30px);
+transition: all 0.8s ease-out;
+}
+.fade-in.visible {
+opacity: 1;
+transform: translateY(0);
+}
+.floating {
+animation: floating 3s ease-in-out infinite;
+}
+@keyframes floating {
+0%, 100% { transform: translateY(0px); }
+50% { transform: translateY(-10px); }
+}
+.pulse-glow {
+animation: pulse-glow 2s infinite;
+}
+@keyframes pulse-glow {
+0%, 100% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); }
+50% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.6); }
+}
+.loading {
+position: relative;
+pointer-events: none;
+}
+.loading::after {
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+width: 20px;
+height: 20px;
+margin: -10px 0 0 -10px;
+border: 2px solid #ffffff;
+border-top: 2px solid transparent;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.success-message {
+background: linear-gradient(135deg, #10B981, #059669);
+color: white;
+padding: 1rem;
+border-radius: 12px;
+text-align: center;
+margin-top: 1rem;
+opacity: 0;
+transform: scale(0.8);
+transition: all 0.5s ease-out;
+}
+.success-message.show {
+opacity: 1;
+transform: scale(1);
+}
+.error-message {
+background: linear-gradient(135deg, #EF4444, #DC2626);
+color: white;
+padding: 1rem;
+border-radius: 12px;
+text-align: center;
+margin-top: 1rem;
+opacity: 0;
+transform: scale(0.8);
+transition: all 0.5s ease-out;
+}
+.error-message.show {
+opacity: 1;
+transform: scale(1);
+}
+.video-card {
+background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.testimonial-card {
+background: rgba(255, 255, 255, 0.95);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.3);
+}
+@media (max-width: 768px) {
+.hero-title {
+font-size: 2rem;
+line-height: 1.2;
+}
+.hero-subtitle {
+font-size: 1.125rem;
+}
+}
+</style>
+</head>
+<body class="gradient-bg min-h-screen">
+<div class="min-h-screen relative overflow-x-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-indigo-600/20"></div>
+<div class="relative z-10">
+<header class="text-center pt-12 pb-8 fade-in">
+<div class="container mx-auto px-4">
+<div class="mb-6">
+<h1 class="font-['Pacifico'] text-white text-4xl mb-2">logo</h1>
+</div>
+</div>
+</header>
+<main class="container mx-auto px-4 pb-16">
+<section class="text-center mb-16 fade-in">
+<div class="max-w-4xl mx-auto">
+<h1 class="hero-title text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+גלו את הכוח של קריאת שמע ישראל
+</h1>
+<p class="hero-subtitle text-xl md:text-2xl text-white/90 mb-8 font-light">
+גלו את הדרך האישית שלכם להתחבר לקריאת שמע ולחוות חיבור עמוק יותר לבורא עולם
+</p>
+<div class="floating">
+<div class="w-20 h-20 mx-auto mb-8 flex items-center justify-center">
+<i class="ri-play-circle-fill text-6xl text-white/80"></i>
+</div>
+</div>
+</div>
+</section>
+<section class="max-w-md mx-auto mb-16 fade-in">
+<div class="bg-white/95 backdrop-filter backdrop-blur-lg rounded-2xl p-8 shadow-2xl pulse-glow">
+<h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+הירשמו עכשיו וקבלו גישה מיידית
+</h2>
+<form id="contactForm" class="space-y-6">
+<div class="relative">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none w-10 h-10 flex items-center justify-center">
+<i class="ri-mail-line text-gray-400 text-lg"></i>
+</div>
+<input
+type="email"
+id="email"
+placeholder="הכניסו את כתובת המייל שלכם"
+required
+class="w-full px-4 py-4 pr-12 text-lg border-none rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all duration-300 text-right"
+>
+</div>
+<button
+type="submit"
+class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 !rounded-button text-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+>
+קבלו את הסרטונים בחינם
+</button>
+</form>
+<div id="result"></div>
+<p class="text-sm text-gray-600 text-center mt-4">
+<i class="ri-shield-check-line text-green-500 ml-1 w-4 h-4 flex items-center justify-center inline-flex"></i>
+המייל שלכם מוגן ולא יועבר לצדדים שלישיים
+</p>
+</div>
+</section>
+<section class="mb-16 fade-in">
+<div class="max-w-4xl mx-auto">
+<h2 class="text-3xl font-bold text-white text-center mb-12">
+איך הסרטונים ישנו את החיבור שלך לקריאת שמע?
+</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="video-card rounded-xl p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%20minimalist%20professional%20illustration%2C%20ancient%20Hebrew%20scroll%20with%20modern%20interpretation%2C%20elegant%20design%2C%20clean%20lines%2C%20professional%20aesthetic%2C%20muted%20colors%2C%20sophisticated%20style%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20high%20detail%20quality%2C%20single%20object%20focus&width=64&height=64&seq=1&orientation=squarish" alt="ספר תפילה" class="w-full h-full object-cover rounded-lg">
+</div>
+<h3 class="text-xl font-semibold text-white mb-3">חיבור מהלב</h3>
+<p class="text-white/80">נגלה יחד את העוצמה הטמונה בכל מילה בקריאת שמע, ואיך היא יכולה להאיר את חייך באור חדש</p>
+</div>
+<div class="video-card rounded-xl p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%20minimalist%20professional%20illustration%2C%20spiritual%20connection%20symbol%2C%20elegant%20design%2C%20clean%20lines%2C%20professional%20aesthetic%2C%20muted%20colors%2C%20sophisticated%20style%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20high%20detail%20quality%2C%20single%20object%20focus&width=64&height=64&seq=2&orientation=squarish" alt="חיבור רוחני" class="w-full h-full object-cover rounded-lg">
+</div>
+<h3 class="text-xl font-semibold text-white mb-3">מסע אישי לחיבור</h3>
+<p class="text-white/80">נגלה יחד את הדרך האישית שלך ליצירת קשר עמוק ומשמעותי עם הבורא</p>
+</div>
+<div class="video-card rounded-xl p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%20minimalist%20professional%20illustration%2C%20focused%20mind%20symbol%2C%20elegant%20design%2C%20clean%20lines%2C%20professional%20aesthetic%2C%20muted%20colors%2C%20sophisticated%20style%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20high%20detail%20quality%2C%20single%20object%20focus&width=64&height=64&seq=3&orientation=squarish" alt="מיקוד" class="w-full h-full object-cover rounded-lg">
+</div>
+<h3 class="text-xl font-semibold text-white mb-3">נוכחות ומודעות</h3>
+<p class="text-white/80">נלמד טכניקות מעשיות להתחבר לרגע, להיות נוכחים ולהתפלל מעומק הלב</p>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-16 fade-in">
+<div class="max-w-4xl mx-auto">
+<h2 class="text-3xl font-bold text-white text-center mb-12">
+שאלות נפוצות
+</h2>
+<div class="grid gap-6">
+<div class="testimonial-card rounded-xl p-6">
+<div class="flex items-start">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+<i class="ri-question-line text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800 mb-2">האם זה מתאים לי?</h4>
+<p class="text-gray-700">בהחלט! קריאת שמע היא תפילה אישית ועמוקה שמחברת כל יהודי לבורא עולם. יחד נגלה את המשמעות האישית והייחודית שלך בקריאת שמע, ונלמד איך להתחבר אליה מהלב.</p>
+</div>
+</div>
+</div>
+<div class="testimonial-card rounded-xl p-6">
+<div class="flex items-start">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+<i class="ri-question-line text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800 mb-2">מה אורך הסרטונים?</h4>
+<p class="text-gray-700">הסדרה כוללת שלושה סרטונים מעמיקים, כל אחד באורך של כחמש דקות. הסרטונים זמינים לך לתמיד, כך שתוכל לצפות בהם בזמנים שנוחים לך ולחזור אליהם שוב ושוב.</p>
+</div>
+</div>
+</div>
+<div class="testimonial-card rounded-xl p-6">
+<div class="flex items-start">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+<i class="ri-question-line text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800 mb-2">איך הסרטונים יעזרו לי?</h4>
+<p class="text-gray-700">הסרטונים יפתחו בפניך עולם חדש של משמעות בקריאת שמע. נעבור יחד על כל מילה, נבין את עומק הכוונה, ונגלה איך להפוך את התפילה לרגע של חיבור אמיתי ואישי עם הקב״ה.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="text-center fade-in">
+<div class="max-w-2xl mx-auto">
+<h2 class="text-3xl font-bold text-white mb-6">
+מוכנים להתחיל את המסע?
+</h2>
+<p class="text-xl text-white/90 mb-8">
+הזינו את המייל שלכם למעלה וקבלו גישה מיידית לסדרת הסרטונים המיוחדת
+</p>
+<div class="flex justify-center space-x-4 space-x-reverse">
+<div class="flex items-center text-white/80">
+<i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+<span>חינם לחלוטין</span>
+</div>
+<div class="flex items-center text-white/80">
+<i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+<span>גישה מיידית</span>
+</div>
+<div class="flex items-center text-white/80">
+<i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+<span>ללא התחייבות</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+<script id="scroll-animations">
+document.addEventListener('DOMContentLoaded', function() {
+const observerOptions = {
+threshold: 0.1,
+rootMargin: '0px 0px -50px 0px'
+};
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, observerOptions);
+const fadeElements = document.querySelectorAll('.fade-in');
+fadeElements.forEach(el => observer.observe(el));
+});
+</script>
+<script id="form-handling">
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById("contactForm");
+    const result = document.getElementById("result");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+
+        submitButton.classList.add('loading'); // מוסיף אנימציה של טעינה
+        submitButton.textContent = '';
+        submitButton.disabled = true;
+
+        result.innerHTML = '';
+
+        try {
+            const response = await fetch('http://localhost:3000/api/subscribers', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            setTimeout(() => {
+                submitButton.classList.remove('loading');
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="success-message">
+                            <div class="flex items-center justify-center mb-2">
+                                <i class="ri-check-circle-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                <span class="font-semibold">נרשמתם בהצלחה!</span>
+                            </div>
+                            <p>הסרטונים נשלחו למייל שלכם. בדקו גם בתיקיית הספאם.</p>
+                        </div>
+                    `;
+                    form.reset();
+                } else {
+                    result.innerHTML = `
+                        <div class="error-message">
+                            <div class="flex items-center justify-center mb-2">
+                                <i class="ri-error-warning-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                <span class="font-semibold">שגיאה</span>
+                            </div>
+                            <p>${data.error || 'אירעה שגיאה, אנא נסו שוב'}</p>
+                        </div>
+                    `;
+                }
+
+                setTimeout(() => {
+                    const messageElement = result.querySelector('.success-message, .error-message');
+                    if (messageElement) messageElement.classList.add('show');
+                }, 100);
+
+            }, 1500);
+
+        } catch (err) {
+            setTimeout(() => {
+                submitButton.classList.remove('loading');
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+
+                result.innerHTML = `
+                    <div class="error-message">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="ri-wifi-off-line text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                            <span class="font-semibold">שגיאת רשת</span>
+                        </div>
+                        <p>בדקו את החיבור לאינטרנט ונסו שוב</p>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const messageElement = result.querySelector('.error-message');
+                    if (messageElement) messageElement.classList.add('show');
+                }, 100);
+
+            }, 1500);
+        }
+    });
+});
+</script>
+
+<script id="smooth-scroll">
+document.addEventListener('DOMContentLoaded', function() {
+let ticking = false;
+function updateScrollEffects() {
+const scrolled = window.pageYOffset;
+const rate = scrolled * -0.5;
+const header = document.querySelector('header');
+if (header) {
+header.style.transform = `translateY(${rate}px)`;
+}
+ticking = false;
+}
+function requestTick() {
+if (!ticking) {
+requestAnimationFrame(updateScrollEffects);
+ticking = true;
+}
+}
+window.addEventListener('scroll', requestTick);
+});
+</script>
+</body>
+</html>
