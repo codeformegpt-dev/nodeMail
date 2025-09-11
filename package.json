@@ -1,6 +1,7 @@
 {
   "name": "makeEmails",
   "version": "1.0.0",
+  "type": "module",
   "description": "שליחת מיילים דרך Vercel Serverless Functions",
   "main": "index.js",
   "scripts": {
@@ -10,6 +11,11 @@
   "author": "codeformegpt",
   "license": "MIT",
   "dependencies": {
-    "nodemailer": "^6.9.4"
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "nodemailer": "^6.10.1",
+    "uuid": "^13.0.0"
   }
 }

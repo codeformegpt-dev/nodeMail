@@ -1,0 +1,958 @@
+===============================================
+?? File: .\package.json
+===============================================
+
+{
+  "name": "makeEmails",
+  "version": "1.0.0",
+  "description": "שליחת מיילים דרך Vercel Serverless Functions",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "author": "codeformegpt",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "nodemailer": "^6.9.4",
+    "uuid": "^13.0.0"
+  }
+}
+
+
+===============================================
+?? File: .\pushToGitHub.ps1
+===============================================
+
+# בדוק אם כבר מחובר ל-remote
+$remote = git remote -v
+if (-not $remote) {
+    git remote add origin https://github.com/codeformegpt-dev/nodeMail.git
+}
+
+# ודא שאתה על main
+git branch -M main
+
+# הוסף את כל השינויים
+git add .
+
+# בצע commit עם הודעה
+git commit -m "Update project for Vercel deployment with Serverless Function"
+
+# דחוף ל-GitHub
+git push -u origin main
+
+
+===============================================
+?? File: .\tasks.txt
+===============================================
+
+רשימת משימות סופית – מערכת ניהול (Admin + Backend)
+שלב 1 – הכנה וסדר פרויקט
+
+ארגון תיקיות
+
+ליצור מבנה מסודר:
+
+project/
+  frontend/   ← הטפסים וה־Admin Dashboard
+  backend/    ← שרת Node.js
+    routes/
+    models/
+    services/
+  package.json
+  .env
+
+
+יתרון: מ separation ברור בין frontend ל־backend, קל להתרחב.
+
+עדכון package.json
+
+להוסיף תלות: express, nodemailer, body-parser (או express.json), ו־sqlite3 או better-sqlite3.
+
+להגדיר סקריפט start → node backend/server.js.
+
+שלב 2 – בסיס Backend
+
+שרת Express בסיסי
+
+להקים backend/server.js.
+
+להגדיר middleware express.json() לטיפול ב־POST.
+
+להגדיר נתיב בדיקה GET /ping להבטחת שהשרת רץ.
+
+מודול ניהול SMTP
+
+ליצור backend/services/mailer.js.
+
+להגדיר transporter של NodeMailer (נתוני התחברות ב־.env).
+
+פונקציה sendMail(to, subject, body) שמחזירה Promise.
+
+שלב 3 – אחסון נתונים
+
+בחירת DB
+
+לשימוש קל → SQLite (sqlite3).
+
+יצירת קובץ backend/models/db.js שמתחבר ל־SQLite.
+
+טבלאות דרושות
+
+subscribers: id, name, email, phone, createdAt.
+
+messages: id, title, body, type, createdAt.
+
+אתחול DB
+
+בקובץ db.js, לבדוק אם הטבלאות קיימות → אם לא, ליצור אותן.
+
+שלב 4 – API לניהול נתונים
+
+ניהול Subscribers
+
+POST /api/subscribers – הוספת רשום חדש (ולידציה + מניעת כפילות לפי email).
+
+GET /api/subscribers – החזרת כל הרשומים.
+
+ניהול Messages
+
+POST /api/messages – יצירת הודעה חדשה (type = "auto" או "manual").
+
+GET /api/messages – החזרת כל ההודעות.
+
+PUT /api/messages/:id – עדכון הודעה קיימת (למשל ההודעה האוטומטית).
+
+שליחת הודעות מרובות
+
+POST /api/broadcast – שולח הודעה לכולם.
+
+לולאה על subscribers, קריאה ל־sendMail.
+
+החזרת תוצאה עם מספר הצלחות/כשלונות.
+
+שלב 5 – לוגיקה של שליחה אוטומטית
+
+ברישום חדש
+
+כשנכנס POST ל־/api/subscribers:
+
+הוספה לטבלת subscribers.
+
+שליפה של ההודעה האוטומטית (messages WHERE type="auto").
+
+קריאה ל־sendMail למייל הנרשם.
+
+שלב 6 – אבטחה
+
+גישה ל־Admin בלבד
+
+Middleware שמוודא סיסמת API פשוטה (כמו header Authorization).
+
+אפשר להתחיל עם מפתח קבוע בקובץ .env.
+
+יחול על כל /api/messages, /api/broadcast, /api/subscribers (GET) – לא על רישום חדש.
+
+שלב 7 – חיבור ל־Frontend קיים
+
+עדכון טופס באתר הקיים
+
+לשנות את הקריאה מ־/api/sendMail ל־/api/subscribers.
+
+לשלוח JSON { name, email, phone }.
+
+להציג הודעת הצלחה/כישלון למשתמש.
+
+ביטול NodeMailer ישיר
+
+לא לשלוח ישירות מהמייל הישן → הכל עובר דרך ה־API החדש.
+
+שלב 8 – Admin Dashboard (פשוט, לוגיקה בלבד)
+
+צפייה ברשומים
+
+דף שמבצע fetch ל־/api/subscribers ומציג רשימה.
+
+ניהול הודעה אוטומטית
+
+טופס שמבצע fetch ל־PUT /api/messages/:id.
+
+שליחת Broadcast
+
+טופס לטקסט → קריאה ל־/api/broadcast.
+
+שלב 9 – בדיקות ואבטחת איכות
+
+בדיקות זרימה
+
+משתמש נרשם → נוסף ל־DB → מקבל מייל אוטומטי.
+
+Admin נכנס → רואה רשומים + משנה הודעה אוטומטית + שולח Broadcast.
+
+טיפול בשגיאות
+
+בדיקת מייל לא חוקי → שרת מחזיר 400.
+
+בדיקת כפילות מייל → החזרת הודעה מתאימה.
+
+בדיקת כשל בשליחה → להציג ל־Admin כישלונות חלקיים.
+
+תחזית באגים
+
+אפשרי: כשלון שליחה באמצע Broadcast (SMTP נופל). → פתרון: try/catch + ספירת הצלחות/כשלונות.
+
+אפשרי: גישה לא מורשית ל־API. → פתרון: middleware בדוק header בכל קריאה רלוונטית.
+
+אפשרי: קריסה אם DB לא מאותחל. → פתרון: פונקציית init ב־startup.
+
+✅ סיכום
+
+הרשימה בנויה שלב-שלב:
+
+סדר וארגון →
+
+Backend בסיסי →
+
+DB →
+
+API →
+
+לוגיקת שליחה →
+
+אבטחה →
+
+חיבור לפרונט הקיים →
+
+דשבורד Admin →
+
+בדיקות ותיקוני באגים.
+
+רוצה שאמפה את זה עכשיו כ־תרשים זרימה של המערכת (משתמש → API → DB → מיילים → Admin)?
+
+
+===============================================
+?? File: .\api\sendMail.js
+===============================================
+
+import nodemailer from "nodemailer";
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Missing email" });
+  }
+
+  try {
+    // הגדרת טרנספורטר Gmail
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "codeformegpt@gmail.com",  // המייל שלך
+        pass: "plnhyagoqawnotsx"        // סיסמת אפליקציה
+      }
+    });
+
+    await transporter.sendMail({
+      from: "codeformegpt@gmail.com",
+      to: email,
+      subject: "תודה על הפנייה שלך",
+      text: "הנה הקישור לאתר: https://readdy.link/preview/e852898e-2322-4f90-9583-2473e004832c/2178168"
+    });
+
+    res.status(200).json({ message: "המייל נשלח בהצלחה ל: " + email });
+  } catch (err) {
+    console.error("שגיאה בשליחת המייל:", err);
+    res.status(500).json({ error: "שגיאה בשליחת המייל" });
+  }
+}
+
+
+===============================================
+?? File: .\backend\service.js
+===============================================
+
+import express from 'express';
+import fs from 'fs/promises';
+import path from 'path';
+import sendMail from './services/mailer.js';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+// מסלול קובץ JSON לשמירת הרשומים
+const subscribersFile = path.join(process.cwd(), 'data', 'subscribers.json');
+
+// פונקציה לקרוא רשומים
+async function readSubscribers() {
+  try {
+    const data = await fs.readFile(subscribersFile, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    return [];
+  }
+}
+
+// פונקציה לשמור רשומים
+async function writeSubscribers(subscribers) {
+  await fs.mkdir(path.dirname(subscribersFile), { recursive: true });
+  await fs.writeFile(subscribersFile, JSON.stringify(subscribers, null, 2));
+}
+
+// API: הוספת רשום חדש
+app.post('/api/subscribers', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+
+  const subscribers = await readSubscribers();
+  if (subscribers.some(sub => sub.email === email)) {
+    return res.status(409).json({ error: 'Email already exists' });
+  }
+
+  subscribers.push({ email, date: new Date().toISOString() });
+  await writeSubscribers(subscribers);
+
+  try {
+    await sendMail(email, 'תודה על ההרשמה', 'קיבלת גישה לסדרת הסרטונים שלנו');
+    res.json({ message: 'Subscriber added and email sent' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error sending email' });
+  }
+});
+
+// API: קבלת כל הרשומים
+app.get('/api/subscribers', async (req, res) => {
+  const subscribers = await readSubscribers();
+  res.json(subscribers);
+});
+
+// API: מחיקת רשום
+app.delete('/api/subscribers/:email', async (req, res) => {
+  const { email } = req.params;
+  let subscribers = await readSubscribers();
+  subscribers = subscribers.filter(sub => sub.email !== email);
+  await writeSubscribers(subscribers);
+  res.json({ message: 'Subscriber deleted' });
+});
+
+// API: עדכון תוכן הודעה אוטומטית (ניתן להרחיב לעתיד)
+const messagesFile = path.join(process.cwd(), 'data', 'messages.json');
+async function readMessages() {
+  try {
+    const data = await fs.readFile(messagesFile, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    return {};
+  }
+}
+async function writeMessages(messages) {
+  await fs.mkdir(path.dirname(messagesFile), { recursive: true });
+  await fs.writeFile(messagesFile, JSON.stringify(messages, null, 2));
+}
+
+app.get('/api/messages', async (req, res) => {
+  const messages = await readMessages();
+  res.json(messages);
+});
+
+app.post('/api/messages', async (req, res) => {
+  const { subject, text } = req.body;
+  if (!subject || !text) return res.status(400).json({ error: 'Missing subject or text' });
+
+  const messages = await readMessages();
+  messages.latest = { subject, text, date: new Date().toISOString() };
+  await writeMessages(messages);
+
+  res.json({ message: 'Message updated' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+
+===============================================
+?? File: .\backend\data\messages.json
+===============================================
+
+[]
+
+
+===============================================
+?? File: .\backend\data\subscribers.json
+===============================================
+
+[]
+
+
+===============================================
+?? File: .\backend\services\mailer.js
+===============================================
+
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// יצירת transporter יחיד לשימוש חוזר
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+/**
+ * שליחת מייל
+ * @param {string} to - כתובת יעד
+ * @param {string} subject - נושא המייל
+ * @param {string} text - תוכן המייל (טקסט בלבד)
+ * @returns {Promise} - מבטיח סיום שליחה או שגיאה
+ */
+export async function sendMail(to, subject, text) {
+    try {
+        const info = await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to,
+            subject,
+            text
+        });
+        return info;
+    } catch (error) {
+        console.error('שגיאה בשליחת המייל:', error);
+        throw error;
+    }
+}
+
+
+===============================================
+?? File: .\fronted\index.html
+===============================================
+
+<!DOCTYPE html>
+<!-- it pushd! -->
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>גלו את הכוח של קריאת שמע ישראל</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+   <script>
+    const form = document.getElementById("contactForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+
+      try {
+        const response = await fetch("/api/sendMail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          result.textContent = data.message;
+        } else {
+          result.textContent = "שגיאה: " + data.error;
+        }
+      } catch (err) {
+        result.textContent = "שגיאה ברשת";
+      }
+    });
+  </script>
+   <script>
+      
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#7C3AED'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    },
+                    fontFamily: {
+                        'hebrew': ['Heebo', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.6); }
+        }
+        
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 1rem;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease-out;
+        }
+        
+        .success-message.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 1rem;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease-out;
+        }
+        
+        .error-message.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .video-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="min-h-screen relative overflow-x-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-indigo-600/20"></div>
+        
+        <div class="relative z-10">
+            <header class="text-center pt-12 pb-8 fade-in">
+                <div class="container mx-auto px-4">
+                    <div class="mb-6">
+                        <h1 class="font-['Pacifico'] text-white text-4xl mb-2">logo</h1>
+                    </div>
+                </div>
+            </header>
+
+            <main class="container mx-auto px-4 pb-16">
+                <section class="text-center mb-16 fade-in">
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="hero-title text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                            גלו את הכוח של קריאת שמע ישראל
+                        </h1>
+                        <p class="hero-subtitle text-xl md:text-2xl text-white/90 mb-8 font-light">
+                            קבלו סדרת סרטונים מיוחדת בחינם וחברו לה' בצורה עמוקה יותר
+                        </p>
+                        <div class="floating">
+                            <div class="w-20 h-20 mx-auto mb-8 flex items-center justify-center">
+                                <i class="ri-play-circle-fill text-6xl text-white/80"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="max-w-md mx-auto mb-16 fade-in">
+                    <div class="bg-white/95 backdrop-filter backdrop-blur-lg rounded-2xl p-8 shadow-2xl pulse-glow">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                            הירשמו עכשיו וקבלו גישה מיידית
+                        </h2>
+                        
+                        <form id="contactForm" class="space-y-6">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none w-10 h-10 flex items-center justify-center">
+                                    <i class="ri-mail-line text-gray-400 text-lg"></i>
+                                </div>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    placeholder="הכניסו את כתובת המייל שלכם" 
+                                    required
+                                    class="w-full px-4 py-4 pr-12 text-lg border-none rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all duration-300 text-right"
+                                >
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 !rounded-button text-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                            >
+                                קבלו את הסרטונים בחינם
+                            </button>
+                        </form>
+                        
+                        <div id="result"></div>
+                        
+                        <p class="text-sm text-gray-600 text-center mt-4">
+                            <i class="ri-shield-check-line text-green-500 ml-1 w-4 h-4 flex items-center justify-center inline-flex"></i>
+                            המייל שלכם מוגן ולא יועבר לצדדים שלישיים
+                        </p>
+                    </div>
+                </section>
+
+                <section class="mb-16 fade-in">
+                    <div class="max-w-4xl mx-auto">
+                        <h2 class="text-3xl font-bold text-white text-center mb-12">
+                            מה תקבלו בסדרת הסרטונים?
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="video-card rounded-xl p-6 text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                    <img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20Prayer%20book%20with%20Hebrew%20text%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=1&orientation=squarish" alt="ספר תפילה" class="w-full h-full object-cover rounded-lg">
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">הבנת המשמעות</h3>
+                                <p class="text-white/80">למדו את המשמעות העמוקה של כל מילה בקריאת שמע</p>
+                            </div>
+                            
+                            <div class="video-card rounded-xl p-6 text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                    <img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20Heart%20with%20spiritual%20light%20emanating%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=2&orientation=squarish" alt="לב רוחני" class="w-full h-full object-cover rounded-lg">
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">חיבור רוחני</h3>
+                                <p class="text-white/80">טכניקות מעשיות ליצירת חיבור אמיתי עם הבורא</p>
+                            </div>
+                            
+                            <div class="video-card rounded-xl p-6 text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                    <img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20Meditation%20pose%20with%20peaceful%20aura%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=3&orientation=squarish" alt="מדיטציה" class="w-full h-full object-cover rounded-lg">
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-3">כוונה ומיקוד</h3>
+                                <p class="text-white/80">איך להתרכז ולהביא כוונה אמיתית לתפילה</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-16 fade-in">
+                    <div class="max-w-4xl mx-auto">
+                        <h2 class="text-3xl font-bold text-white text-center mb-12">
+                            מה אומרים אנשים שכבר צפו?
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="testimonial-card rounded-xl p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center ml-3">
+                                        <i class="ri-user-fill text-white text-lg w-6 h-6 flex items-center justify-center"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">רחל כהן</h4>
+                                        <p class="text-gray-600 text-sm">ירושלים</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 italic">
+                                    "הסרטונים האלה שינו לי את כל התפיסה של התפילה. עכשיו אני מרגישה חיבור אמיתי בכל פעם שאני אומרת קריאת שמע."
+                                </p>
+                                <div class="flex text-yellow-400 mt-3">
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="testimonial-card rounded-xl p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center ml-3">
+                                        <i class="ri-user-fill text-white text-lg w-6 h-6 flex items-center justify-center"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">אברהם לוי</h4>
+                                        <p class="text-gray-600 text-sm">תל אביב</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 italic">
+                                    "כבר 30 שנה אני אומר קריאת שמע, אבל רק אחרי הסרטונים האלה הבנתי באמת מה אני אומר. תודה רבה!"
+                                </p>
+                                <div class="flex text-yellow-400 mt-3">
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                    <i class="ri-star-fill w-4 h-4 flex items-center justify-center"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="text-center fade-in">
+                    <div class="max-w-2xl mx-auto">
+                        <h2 class="text-3xl font-bold text-white mb-6">
+                            מוכנים להתחיל את המסע?
+                        </h2>
+                        <p class="text-xl text-white/90 mb-8">
+                            הזינו את המייל שלכם למעלה וקבלו גישה מיידית לסדרת הסרטונים המיוחדת
+                        </p>
+                        <div class="flex justify-center space-x-4 space-x-reverse">
+                            <div class="flex items-center text-white/80">
+                                <i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+                                <span>חינם לחלוטין</span>
+                            </div>
+                            <div class="flex items-center text-white/80">
+                                <i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+                                <span>גישה מיידית</span>
+                            </div>
+                            <div class="flex items-center text-white/80">
+                                <i class="ri-check-line text-green-400 ml-2 w-5 h-5 flex items-center justify-center"></i>
+                                <span>ללא התחייבות</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script id="scroll-animations">
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
+
+    <script id="form-handling">
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById("contactForm");
+            const result = document.getElementById("result");
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+
+            form.addEventListener("submit", async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById("email").value;
+                
+                submitButton.classList.add('loading');
+                submitButton.textContent = '';
+                submitButton.disabled = true;
+                
+                result.innerHTML = '';
+                
+                try {
+                    const response = await fetch("/api/sendMail", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    setTimeout(() => {
+                        submitButton.classList.remove('loading');
+                        submitButton.textContent = originalButtonText;
+                        submitButton.disabled = false;
+                        
+                        if (response.ok) {
+                            result.innerHTML = `
+                                <div class="success-message">
+                                    <div class="flex items-center justify-center mb-2">
+                                        <i class="ri-check-circle-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                        <span class="font-semibold">נרשמתם בהצלחה!</span>
+                                    </div>
+                                    <p>הסרטונים נשלחו למייל שלכם. בדקו גם בתיקיית הספאם.</p>
+                                </div>
+                            `;
+                            form.reset();
+                        } else {
+                            result.innerHTML = `
+                                <div class="error-message">
+                                    <div class="flex items-center justify-center mb-2">
+                                        <i class="ri-error-warning-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                        <span class="font-semibold">שגיאה</span>
+                                    </div>
+                                    <p>${data.error || 'אירעה שגיאה, אנא נסו שוב'}</p>
+                                </div>
+                            `;
+                        }
+                        
+                        setTimeout(() => {
+                            const messageElement = result.querySelector('.success-message, .error-message');
+                            if (messageElement) {
+                                messageElement.classList.add('show');
+                            }
+                        }, 100);
+                        
+                    }, 1500);
+                    
+                } catch (err) {
+                    setTimeout(() => {
+                        submitButton.classList.remove('loading');
+                        submitButton.textContent = originalButtonText;
+                        submitButton.disabled = false;
+                        
+                        result.innerHTML = `
+                            <div class="error-message">
+                                <div class="flex items-center justify-center mb-2">
+                                    <i class="ri-wifi-off-line text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                    <span class="font-semibold">שגיאת רשת</span>
+                                </div>
+                                <p>בדקו את החיבור לאינטרנט ונסו שוב</p>
+                            </div>
+                        `;
+                        
+                        setTimeout(() => {
+                            const messageElement = result.querySelector('.error-message');
+                            if (messageElement) {
+                                messageElement.classList.add('show');
+                            }
+                        }, 100);
+                        
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+
+    <script id="smooth-scroll">
+        document.addEventListener('DOMContentLoaded', function() {
+            let ticking = false;
+            
+            function updateScrollEffects() {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                const header = document.querySelector('header');
+                if (header) {
+                    header.style.transform = `translateY(${rate}px)`;
+                }
+                
+                ticking = false;
+            }
+            
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollEffects);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', requestTick);
+        });
+    </script>
+</body>
+</html>
+
+
