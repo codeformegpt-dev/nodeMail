@@ -1,8 +1,12 @@
-# הסר remote קיים (אם יש)
-git remote remove origin 2>$null
+# =========================
+# סקריפט Git עם התעלמות מ-node_modules
+# =========================
 
-# הוסף remote חדש
-git remote add origin https://github.com/avrahambnm/nodeMail.git
+# בדוק אם כבר מחובר ל-remote
+$remote = git remote -v
+if (-not $remote) {
+    git remote add origin https://github.com/codeformegpt-dev/nodeMail.git
+}
 
 # ודא שאתה על main
 git branch -M main
