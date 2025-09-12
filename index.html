@@ -338,10 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/sendMail', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    to: email,                           
-                    subject: 'הסרטונים שלך',          
-                    text: 'שלום! הנה קישור לסרטונים שלך...' })
+                body: JSON.stringify({ email })
             });
 
             const data = await response.json();
