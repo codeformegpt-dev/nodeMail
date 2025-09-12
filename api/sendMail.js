@@ -1,3 +1,6 @@
+import { sendMail } from '../../backend/services/mailer.js';
+
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { email } = req.body; // מקבל מהטופס
