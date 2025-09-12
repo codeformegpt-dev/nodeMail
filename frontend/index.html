@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         result.innerHTML = '';
 
         try {
-            const response = await fetch('http://localhost:3000/api/subscribers', {
+            const response = await fetch('/api/sendMail', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email })

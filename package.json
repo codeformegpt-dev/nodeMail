@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "description": "Local email subscription project",
   "type": "module",
-  "scripts": {
-    "backend": "node backend/service.js",
-    "frontend": "live-server frontend --port=5500",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
-  },
+ 
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
