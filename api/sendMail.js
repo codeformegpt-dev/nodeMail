@@ -1,4 +1,4 @@
-import { sendMail } from '../../backend/services/mailer.js';
+import { sendMail } from '../backend/services/mailer.js';
 
 
 export default async function handler(req, res) {
