@@ -1,0 +1,1041 @@
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\.env =====
+
+EMAIL_USER=avrahambnm@gmail.com
+EMAIL_PASS=awmymdolsfnecvbw
+PORT=3000
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\.gitignore =====
+
+node_modules
+node_modules/
+
+
+
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\index.html =====
+
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#4F46E5',
+secondary: '#7C3AED'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+},
+fontFamily: {
+'hebrew': ['Heebo', 'sans-serif']
+}
+}
+}
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+const observerOptions = {
+threshold: 0.1,
+rootMargin: '0px 0px -50px 0px'
+};
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, observerOptions);
+const fadeElements = document.querySelectorAll('.fade-in');
+fadeElements.forEach(el => observer.observe(el));
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById("contactForm");
+    const result = document.getElementById("result");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+
+        submitButton.classList.add('loading'); // מוסיף אנימציה של טעינה
+        submitButton.textContent = '';
+        submitButton.disabled = true;
+
+        result.innerHTML = '';
+
+        try {
+            const response = await fetch('/api/sendMail', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            setTimeout(() => {
+                submitButton.classList.remove('loading');
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="success-message">
+                            <div class="flex items-center justify-center mb-2">
+                                <i class="ri-check-circle-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                <span class="font-semibold">נרשמתם בהצלחה!</span>
+                            </div>
+                            <p>הסרטונים נשלחו למייל שלכם. בדקו גם בתיקיית הספאם.</p>
+                        </div>
+                    `;
+                    form.reset();
+                } else {
+                    result.innerHTML = `
+                        <div class="error-message">
+                            <div class="flex items-center justify-center mb-2">
+                                <i class="ri-error-warning-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                                <span class="font-semibold">שגיאה</span>
+                            </div>
+                            <p>${data.error || 'אירעה שגיאה, אנא נסו שוב'}</p>
+                        </div>
+                    `;
+                }
+
+                setTimeout(() => {
+                    const messageElement = result.querySelector('.success-message, .error-message');
+                    if (messageElement) messageElement.classList.add('show');
+                }, 100);
+
+            }, 1500);
+
+        } catch (err) {
+            setTimeout(() => {
+                submitButton.classList.remove('loading');
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+
+                result.innerHTML = `
+                    <div class="error-message">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="ri-wifi-off-line text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                            <span class="font-semibold">שגיאת רשת</span>
+                        </div>
+                        <p>בדקו את החיבור לאינטרנט ונסו שוב</p>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const messageElement = result.querySelector('.error-message');
+                    if (messageElement) messageElement.classList.add('show');
+                }, 100);
+
+            }, 1500);
+        }
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+let ticking = false;
+function updateScrollEffects() {
+const scrolled = window.pageYOffset;
+const rate = scrolled * -0.5;
+const header = document.querySelector('header');
+if (header) {
+header.style.transform = `translateY(${rate}px)`;
+}
+ticking = false;
+}
+function requestTick() {
+if (!ticking) {
+requestAnimationFrame(updateScrollEffects);
+ticking = true;
+}
+}
+window.addEventListener('scroll', requestTick);
+});
+
+
+
+[Removed HTML logic from C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\index.html]
+
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\package.json =====
+
+{
+  "name": "makeEmails",
+  "version": "1.0.0",
+  "description": "Local email subscription project",
+  "type": "module",
+  "dependencies": {
+    "@vercel/speed-insights": "^1.2.0",
+    "better-sqlite3": "^12.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.4",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "live-server": "^1.2.2"
+  }
+}
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\api\messages.js =====
+
+import { readMessages, addMessage } from '../backend/service.js';
+
+export default async function handler(req, res) {
+    try {
+        if (req.method === 'GET') {
+            const message = readMessages();
+            return res.status(200).json(message || {});
+
+        } else if (req.method === 'POST') {
+            const { subject, text } = req.body;
+            if (!subject || !text) return res.status(400).json({ error: 'Missing subject or text' });
+
+            addMessage(subject, text); // שולח מייל לכל הרשומים בתוך addMessage
+            return res.status(200).json({ message: 'Message updated' });
+
+        } else {
+            return res.status(405).json({ message: 'Method Not Allowed' });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\api\sendMail.js =====
+
+import { sendMail } from '../backend/services/mailer.js';
+import { addSubscriber } from '../backend/service.js'
+
+
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const { email } = req.body; // מקבל מהטופס
+    const to = email;           // מגדיר את to
+    const subject = 'הסרטונים שלך';
+    const text = 'שלום! הנה הקישור לסרטונים שלך...';
+
+    addSubscriber(email);
+
+    try {
+      const info = await sendMail(to, subject, text);
+      res.status(200).json({ success: true, info });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  } else {
+    res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  }
+}
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\api\subscribers.js =====
+
+import { addSubscriber, readSubscribers, deleteSubscriber } from '../backend/service';
+
+export default async function handler(req, res) {
+    try {
+        if (req.method === 'POST') {
+            const { email } = req.body;
+            if (!email) return res.status(400).json({ error: 'Missing email' });
+
+            await addSubscriber(email);
+            // שליחת מייל נשארת ב-service.js (handled automatically)
+            return res.status(200).json({ message: 'Subscriber added' });
+
+        } else if (req.method === 'GET') {
+            const subscribers = readSubscribers();
+            return res.status(200).json(subscribers);
+
+        } else if (req.method === 'DELETE') {
+            const { email } = req.query;
+            if (!email) return res.status(400).json({ error: 'Missing email' });
+
+            deleteSubscriber(email);
+            return res.status(200).json({ message: 'Subscriber deleted' });
+
+        } else {
+            return res.status(405).json({ message: 'Method Not Allowed' });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\backend\db.js =====
+
+// backend/db.js
+import Database from 'better-sqlite3';
+import path from 'path';
+
+const dbPath = path.join(process.cwd(), 'data', 'database.sqlite');
+const db = new Database(dbPath);
+
+// יצירת טבלאות במידת הצורך
+db.exec(`
+CREATE TABLE IF NOT EXISTS subscribers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE,
+    date TEXT
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT,
+    text TEXT,
+    date TEXT
+);
+`);
+
+export default db;
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\backend\service.js =====
+
+import express from 'express';
+import cors from 'cors';
+import Database from 'better-sqlite3';
+import { sendMail } from './mailer.js';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// SQLite DB
+const db = new Database('data/subscribers.db');
+
+// יצירת טבלאות אם לא קיימות
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS subscribers (
+    email TEXT PRIMARY KEY,
+    date TEXT
+  )
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT,
+    text TEXT,
+    date TEXT
+  )
+`).run();
+
+// פונקציות DB
+function readSubscribers() {
+  return db.prepare('SELECT * FROM subscribers').all();
+}
+
+function addSubscriber(email) {
+  const existing = db.prepare('SELECT COUNT(*) AS count FROM subscribers WHERE email = ?').get(email);
+  if (existing.count > 0) throw new Error('Email already exists');
+  db.prepare('INSERT INTO subscribers (email, date) VALUES (?, ?)').run(email, new Date().toISOString());
+}
+
+function deleteSubscriber(email) {
+  db.prepare('DELETE FROM subscribers WHERE email = ?').run(email);
+}
+
+function readMessages() {
+  const row = db.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 1').get();
+  return row || {};
+}
+
+function addMessage(subject, text) {
+  db.prepare('INSERT INTO messages (subject, text, date) VALUES (?, ?, ?)').run(subject, text, new Date().toISOString());
+}
+
+// API Endpoints
+app.get('/api/subscribers', (req, res) => {
+  try {
+    res.json(readSubscribers());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/subscribers', (req, res) => {
+  try {
+    const { email } = req.body;
+    addSubscriber(email);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/subscribers/:email', (req, res) => {
+  try {
+    deleteSubscriber(req.params.email);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/messages', (req, res) => {
+  try {
+    res.json(readMessages());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/messages', (req, res) => {
+  try {
+    const { subject, text } = req.body;
+    addMessage(subject, text);
+
+    // שליחת מייל לכל הרשומים
+    const subscribers = readSubscribers();
+    subscribers.forEach(sub => sendMail(sub.email, subject, text));
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\backend\services\mailer.js =====
+
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// יצירת transporter יחיד לשימוש חוזר
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+/**
+ * שליחת מייל
+ * @param {string} to - כתובת יעד
+ * @param {string} subject - נושא המייל
+ * @param {string} text - תוכן המייל (טקסט בלבד)
+ * @returns {Promise} - מבטיח סיום שליחה או שגיאה
+ */
+export async function sendMail(to, subject, text) {
+    try {
+        const info = await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to,
+            subject,
+            text
+        });
+        return info;
+    } catch (error) {
+        console.error('שגיאה בשליחת המייל:', error);
+        throw error;
+    }
+}
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\data\m.txt =====
+
+its a comment space.
+
+===== C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\frontend\admin.html =====
+
+tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+
+
+const API_URL = '/api';
+        let subscribers = [];
+        let filteredSubscribers = [];
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let sortField = 'date';
+        let sortDirection = 'desc';
+
+        // Show loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-50 border-green-200 text-green-800',
+                error: 'bg-red-50 border-red-200 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                info: 'bg-blue-50 border-blue-200 text-blue-800'
+            };
+            
+            const icons = {
+                success: 'ri-check-line',
+                error: 'ri-error-warning-line',
+                warning: 'ri-alert-line',
+                info: 'ri-information-line'
+            };
+            
+            alertDiv.className = `${colors[type]} border rounded-xl p-4 mb-4 fade-in flex items-center gap-3`;
+            alertDiv.innerHTML = `
+                <div class="w-5 h-5 flex items-center justify-center">
+                    <i class="${icons[type]}"></i>
+                </div>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="w-5 h-5 flex items-center justify-center hover:bg-black hover:bg-opacity-10 rounded">
+                    <i class="ri-close-line"></i>
+                </button>
+            `;
+            
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.classList.add('fade-out');
+                    setTimeout(() => alertDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Load subscribers from server
+        async function loadSubscribers() {
+            try {
+                showLoading();
+                const res = await fetch(`${API_URL}/subscribers`);
+                if (!res.ok) throw new Error('שגיאה בטעינת הרשומים');
+                
+                subscribers = await res.json();
+                filteredSubscribers = [...subscribers];
+                updateStats();
+                updateChart();
+                renderTable();
+                hideLoading();
+            } catch (err) {
+                hideLoading();
+                showAlert(err.message, 'error');
+            }
+        }
+
+        // Update dashboard statistics
+        function updateStats() {
+            const total = subscribers.length;
+            const today = new Date().toDateString();
+            const todayCount = subscribers.filter(sub => 
+                new Date(sub.date).toDateString() === today
+            ).length;
+            
+            document.getElementById('totalSubscribers').textContent = total;
+            document.getElementById('todaySubscribers').textContent = todayCount;
+            document.getElementById('messagesSent').textContent = Math.floor(total * 0.8);
+            document.getElementById('openRate').textContent = '68%';
+        }
+
+        // Update subscribers chart
+        function updateChart() {
+            const chartDom = document.getElementById('subscribersChart');
+            const myChart = echarts.init(chartDom);
+            
+            // Generate sample data for the last 30 days
+            const dates = [];
+            const values = [];
+            const today = new Date();
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                dates.push(date.toLocaleDateString('he-IL'));
+                values.push(Math.floor(Math.random() * 20) + 5);
+            }
+            
+            const option = {
+                animation: false,
+                grid: { top: 20, right: 20, bottom: 40, left: 40 },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLabel: { color: '#6b7280' }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: { color: '#6b7280' }
+                },
+                series: [{
+                    data: values,
+                    type: 'line',
+                    smooth: true,
+                    lineStyle: { color: 'rgba(87, 181, 231, 1)', width: 3 },
+                    itemStyle: { color: 'rgba(87, 181, 231, 1)' },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: 'rgba(87, 181, 231, 0.3)' },
+                                { offset: 1, color: 'rgba(87, 181, 231, 0.05)' }
+                            ]
+                        }
+                    }
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    textStyle: { color: '#1f2937' }
+                }
+            };
+            
+            myChart.setOption(option);
+        }
+
+        // Sort subscribers
+        function sortSubscribers(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'desc';
+            }
+            
+            filteredSubscribers.sort((a, b) => {
+                let aVal = field === 'date' ? new Date(a[field]) : a[field];
+                let bVal = field === 'date' ? new Date(b[field]) : b[field];
+                
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            currentPage = 1;
+            renderTable();
+            updateSortIcons();
+        }
+
+        // Update sort icons
+        function updateSortIcons() {
+            document.querySelectorAll('[id^="sort"] i').forEach(icon => {
+                icon.className = 'ri-arrow-up-down-line text-gray-400';
+            });
+            
+            const activeIcon = document.querySelector(`#sort${sortField.charAt(0).toUpperCase() + sortField.slice(1)} i`);
+            if (activeIcon) {
+                activeIcon.className = sortDirection === 'asc' ? 'ri-arrow-up-line text-primary' : 'ri-arrow-down-line text-primary';
+            }
+        }
+
+        // Filter subscribers
+        function filterSubscribers(searchTerm) {
+            filteredSubscribers = subscribers.filter(sub =>
+                sub.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Render subscribers table
+        function renderTable() {
+            const tbody = document.getElementById('subscribersTable');
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = filteredSubscribers.slice(startIndex, endIndex);
+            
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="ri-inbox-line text-4xl text-gray-300"></i>
+                                <p>אין מנויים להצגה</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageData.map(sub => `
+                    <tr class="hover:bg-gray-50 transition-colors fade-in">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    ${sub.email.charAt(0).toUpperCase()}
+                                </div>
+                                <span class="font-medium text-gray-900">${sub.email}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-600">
+                            ${new Date(sub.date).toLocaleDateString('he-IL', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                פעיל
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <button onclick="editSubscriber('${sub.email}')" 
+                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors !rounded-button"
+                                        title="עריכה">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button onclick="showDeleteModal('${sub.email}')" 
+                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors !rounded-button"
+                                        title="מחיקה">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            updatePagination();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredSubscribers.length / rowsPerPage);
+            const startItem = (currentPage - 1) * rowsPerPage + 1;
+            const endItem = Math.min(currentPage * rowsPerPage, filteredSubscribers.length);
+            
+            document.getElementById('showingFrom').textContent = filteredSubscribers.length > 0 ? startItem : 0;
+            document.getElementById('showingTo').textContent = endItem;
+            document.getElementById('totalRows').textContent = filteredSubscribers.length;
+            
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Generate page numbers
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+            
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = `px-3 py-2 text-sm rounded-lg transition-colors !rounded-button ${
+                    i === currentPage 
+                        ? 'bg-primary text-white' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                }`;
+                button.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pageNumbers.appendChild(button);
+            }
+        }
+
+        // Show delete confirmation modal
+        function showDeleteModal(email) {
+            document.getElementById('deleteEmail').textContent = email;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('confirmDelete').onclick = () => deleteSubscriber(email);
+        }
+
+        // Delete subscriber
+        async function deleteSubscriber(email) {
+            try {
+                showLoading();
+                const res = await fetch(`${API_URL}/subscribers/${email}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('שגיאה במחיקת המנוי');
+                
+                showAlert(`המנוי ${email} נמחק בהצלחה`, 'success');
+                document.getElementById('deleteModal').classList.add('hidden');
+                await loadSubscribers();
+                hideLoading();
+            } catch (err) {
+                hideLoading();
+                showAlert(err.message, 'error');
+            }
+        }
+
+        // Edit subscriber (placeholder)
+        function editSubscriber(email) {
+            showAlert('פונקציית עריכה תתווסף בקרוב', 'info');
+        }
+
+        // Export subscribers to CSV
+        function exportSubscribers() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Email,Registration Date\n"
+                + subscribers.map(sub => `${sub.email},${sub.date}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('הקובץ יוצא בהצלחה', 'success');
+        }
+
+        // Message templates
+        const messageTemplates = {
+            welcome: {
+                subject: 'ברוכים הבאים למשפחה שלנו!',
+                content: 'שלום וברוכים הבאים!\n\nאנחנו שמחים שהצטרפת אלינו. תוכל לצפות לקבל עדכונים מעניינים ותוכן איכותי.\n\nבברכה,\nהצוות'
+            },
+            newsletter: {
+                subject: 'הניוזלטר השבועי שלנו',
+                content: 'שלום רב,\n\nהנה העדכונים החשובים השבוע:\n\n• עדכון 1\n• עדכון 2\n• עדכון 3\n\nנשמח לשמוע את דעתכם!\n\nבברכה,\nהצוות'
+            },
+            promotion: {
+                subject: 'הצעה מיוחדת רק עבורך!',
+                content: 'שלום,\n\nיש לנו הצעה מיוחדת רק עבורך! הנחה של 20% על כל המוצרים.\n\nהשתמש בקוד: SPECIAL20\n\nבברכה,\nהצוות'
+            },
+            update: {
+                subject: 'עדכון חשוב על המוצר שלנו',
+                content: 'שלום,\n\nאנחנו מתרגשים לשתף איתכם עדכון חשוב על המוצר שלנו.\n\nפרטים נוספים באתר שלנו.\n\nבברכה,\nהצוות'
+            }
+        };
+
+        // Apply message template
+        function applyTemplate(templateKey) {
+            const template = messageTemplates[templateKey];
+            if (template) {
+                document.getElementById('subject').value = template.subject;
+                document.getElementById('messageText').value = template.content;
+            }
+        }
+
+        // Send message to subscribers
+        async function sendMessage(formData) {
+            try {
+                showLoading();
+                const res = await fetch(`${API_URL}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!res.ok) throw new Error('שגיאה בשליחת ההודעה');
+                
+                showAlert('ההודעה נשלחה בהצלחה לכל המנויים', 'success');
+                document.getElementById('messageForm').reset();
+                hideLoading();
+            } catch (err) {
+                hideLoading();
+                showAlert(err.message, 'error');
+            }
+        }
+
+        // Show message preview
+        function showPreview() {
+            const subject = document.getElementById('subject').value;
+            const content = document.getElementById('messageText').value;
+            
+            if (!subject || !content) {
+                showAlert('אנא מלא את כל השדות לפני התצוגה המקדימה', 'warning');
+                return;
+            }
+            
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = `
+                <div class="border-b border-gray-200 pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">${subject}</h3>
+                    <p class="text-sm text-gray-500 mt-1">נושא: ${subject}</p>
+                </div>
+                <div class="whitespace-pre-wrap text-gray-700">${content}</div>
+            `;
+            
+            document.getElementById('previewModal').classList.remove('hidden');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSubscribers();
+        });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterSubscribers(this.value);
+                }, 300);
+            });
+
+            // Rows per page change
+            document.getElementById('rowsPerPage').addEventListener('change', function() {
+                rowsPerPage = parseInt(this.value);
+                currentPage = 1;
+                renderTable();
+            });
+
+            // Sort functionality
+            document.getElementById('sortEmail').addEventListener('click', () => sortSubscribers('email'));
+            document.getElementById('sortDate').addEventListener('click', () => sortSubscribers('date'));
+
+            // Pagination
+            document.getElementById('prevPage').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', function() {
+                const totalPages = Math.ceil(filteredSubscribers.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', loadSubscribers);
+
+            // Export button
+            document.getElementById('exportBtn').addEventListener('click', exportSubscribers);
+
+            // Message template selection
+            document.getElementById('messageTemplate').addEventListener('change', function() {
+                if (this.value) {
+                    applyTemplate(this.value);
+                }
+            });
+
+            // Schedule message checkbox
+            document.getElementById('scheduleMessage').addEventListener('change', function() {
+                document.getElementById('scheduleTime').disabled = !this.checked;
+            });
+
+            // Message form submission
+            document.getElementById('messageForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const subject = document.getElementById('subject').value.trim();
+                const text = document.getElementById('messageText').value.trim();
+                const scheduled = document.getElementById('scheduleMessage').checked;
+                const scheduleTime = document.getElementById('scheduleTime').value;
+                
+                if (!subject || !text) {
+                    showAlert('אנא מלא את כל השדות הנדרשים', 'warning');
+                    return;
+                }
+                
+                if (scheduled && !scheduleTime) {
+                    showAlert('אנא בחר זמן לתזמון השליחה', 'warning');
+                    return;
+                }
+                
+                const formData = { subject, text };
+                if (scheduled) {
+                    formData.scheduleTime = scheduleTime;
+                }
+                
+                sendMessage(formData);
+            });
+
+            // Save draft button
+            document.getElementById('saveDraftBtn').addEventListener('click', function() {
+                const subject = document.getElementById('subject').value;
+                const content = document.getElementById('messageText').value;
+                
+                if (subject || content) {
+                    localStorage.setItem('messageDraft', JSON.stringify({ subject, content }));
+                    showAlert('הטיוטה נשמרה בהצלחה', 'success');
+                } else {
+                    showAlert('אין תוכן לשמירה', 'warning');
+                }
+            });
+
+            // Load draft on page load
+            const savedDraft = localStorage.getItem('messageDraft');
+            if (savedDraft) {
+                const draft = JSON.parse(savedDraft);
+                document.getElementById('subject').value = draft.subject || '';
+                document.getElementById('messageText').value = draft.content || '';
+            }
+
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', showPreview);
+
+            // Close preview modal
+            document.getElementById('closePreview').addEventListener('click', function() {
+                document.getElementById('previewModal').classList.add('hidden');
+            });
+
+            // Delete modal handlers
+            document.getElementById('cancelDelete').addEventListener('click', function() {
+                document.getElementById('deleteModal').classList.add('hidden');
+            });
+
+            // Close modals when clicking outside
+            document.getElementById('deleteModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('previewModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+
+
+
+[Removed HTML logic from C:\Users\Home\Desktop\david\devlope\Projects\abraham\makeEmails\frontend\admin.html]
+
