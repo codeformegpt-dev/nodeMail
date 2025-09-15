@@ -1,112 +1,111 @@
 import express from 'express';
-import fs from 'fs/promises';
 import cors from 'cors';
-import path from 'path';
-import { sendMail } from './services/mailer.js';
+import Database from 'better-sqlite3';
+import { sendMail } from './mailer.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// מסלול קובץ JSON לשמירת הרשומים
-const subscribersFile = path.join(process.cwd(), 'data', 'subscribers.json');
+// SQLite DB
+const db = new Database('data/subscribers.db');
 
-// פונקציה לקרוא רשומים
-async function readSubscribers() {
+// יצירת טבלאות אם לא קיימות
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS subscribers (
+    email TEXT PRIMARY KEY,
+    date TEXT
+  )
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT,
+    text TEXT,
+    date TEXT
+  )
+`).run();
+
+// פונקציות DB
+function readSubscribers() {
+  return db.prepare('SELECT * FROM subscribers').all();
+}
+
+function addSubscriber(email) {
+  const existing = db.prepare('SELECT COUNT(*) AS count FROM subscribers WHERE email = ?').get(email);
+  if (existing.count > 0) throw new Error('Email already exists');
+  db.prepare('INSERT INTO subscribers (email, date) VALUES (?, ?)').run(email, new Date().toISOString());
+}
+
+function deleteSubscriber(email) {
+  db.prepare('DELETE FROM subscribers WHERE email = ?').run(email);
+}
+
+function readMessages() {
+  const row = db.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 1').get();
+  return row || {};
+}
+
+function addMessage(subject, text) {
+  db.prepare('INSERT INTO messages (subject, text, date) VALUES (?, ?, ?)').run(subject, text, new Date().toISOString());
+}
+
+// API Endpoints
+app.get('/api/subscribers', (req, res) => {
   try {
-    const data = await fs.readFile(subscribersFile, 'utf-8');
-    return JSON.parse(data);
+    res.json(readSubscribers());
   } catch (err) {
-    return [];
+    res.status(500).json({ error: err.message });
   }
-}
+});
 
-// פונקציה לשמור רשומים
-async function writeSubscribers(subscribers) {
-  await fs.mkdir(path.dirname(subscribersFile), { recursive: true });
-  await fs.writeFile(subscribersFile, JSON.stringify(subscribers, null, 2));
-}
-
-// API: הוספת רשום חדש
-app.post('/api/subscribers', async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'Missing email' });
-
+app.post('/api/subscribers', (req, res) => {
   try {
-    const subscribers = await readSubscribers();
-
-    // בדיקה אם המייל כבר קיים
-    if (subscribers.some(sub => sub.email === email)) {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
-
-    // הוספה למערך ושמירה חזרה לקובץ
-    subscribers.push({ email, date: new Date().toISOString() });
-    await writeSubscribers(subscribers);
-
-    // ניסיון לשלוח מייל
-    try {
-      await sendMail(email, 'תודה על ההרשמה', 'קיבלת גישה לסדרת הסרטונים שלנו');
-      res.json({ message: 'Subscriber added and email sent' });
-    } catch (mailErr) {
-      console.error(mailErr);
-      res.status(500).json({ error: 'Subscriber added but failed to send email' });
-    }
-
+    const { email } = req.body;
+    addSubscriber(email);
+    res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(400).json({ error: err.message });
   }
 });
 
-// API: קבלת כל הרשומים
-app.get('/api/subscribers', async (req, res) => {
-  const subscribers = await readSubscribers();
-  res.json(subscribers);
-});
-
-// API: מחיקת רשום
-app.delete('/api/subscribers/:email', async (req, res) => {
-  const { email } = req.params;
-  let subscribers = await readSubscribers();
-  subscribers = subscribers.filter(sub => sub.email !== email);
-  await writeSubscribers(subscribers);
-  res.json({ message: 'Subscriber deleted' });
-});
-
-// API: עדכון תוכן הודעה אוטומטית (ניתן להרחיב לעתיד)
-const messagesFile = path.join(process.cwd(), 'data', 'messages.json');
-async function readMessages() {
+app.delete('/api/subscribers/:email', (req, res) => {
   try {
-    const data = await fs.readFile(messagesFile, 'utf-8');
-    return JSON.parse(data);
+    deleteSubscriber(req.params.email);
+    res.json({ success: true });
   } catch (err) {
-    return {};
+    res.status(500).json({ error: err.message });
   }
-}
-async function writeMessages(messages) {
-  await fs.mkdir(path.dirname(messagesFile), { recursive: true });
-  await fs.writeFile(messagesFile, JSON.stringify(messages, null, 2));
-}
-
-app.get('/api/messages', async (req, res) => {
-  const messages = await readMessages();
-  res.json(messages);
 });
 
-app.post('/api/messages', async (req, res) => {
-  const { subject, text } = req.body;
-  if (!subject || !text) return res.status(400).json({ error: 'Missing subject or text' });
-
-  const messages = await readMessages();
-  messages.latest = { subject, text, date: new Date().toISOString() };
-  await writeMessages(messages);
-
-  res.json({ message: 'Message updated' });
+app.get('/api/messages', (req, res) => {
+  try {
+    res.json(readMessages());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+app.post('/api/messages', (req, res) => {
+  try {
+    const { subject, text } = req.body;
+    addMessage(subject, text);
+
+    // שליחת מייל לכל הרשומים
+    const subscribers = readSubscribers();
+    subscribers.forEach(sub => sendMail(sub.email, subject, text));
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
