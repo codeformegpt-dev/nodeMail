@@ -13,12 +13,14 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      const { email } = req.body;
+      const { fullname, phone, email } = req.body;
+      if (!fullname) return res.status(400).json({ error: "Missing fullname" });
+      if (!phone) return res.status(400).json({ error: "Missing phone" });
       if (!email) return res.status(400).json({ error: "Missing email" });
 
       try {
         // הוספה למסד
-        await addSubscriber(email);
+        await addSubscriber(fullname, email, phone);
 
         // שליחת מייל
         const to = email;
