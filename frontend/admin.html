@@ -841,51 +841,53 @@
           tbody.innerHTML = pageData
             .map(
               (sub) => `
-                    <tr class="hover:bg-gray-50 transition-colors fade-in">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                                    ${sub.email.charAt(0).toUpperCase()}
-                                </div>
-                                <span class="font-medium text-gray-900">${
-                                  sub.email
-                                }</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-gray-600">
-                            ${new Date(sub.date).toLocaleDateString("he-IL", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                פעיל
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <button onclick="editSubscriber('${
-                                  sub.email
-                                }')" 
-                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors !rounded-button"
-                                        title="עריכה">
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button onclick="showDeleteModal('${
-                                  sub.email
-                                }')" 
-                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors !rounded-button"
-                                        title="מחיקה">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `
+        <tr class="hover:bg-gray-50 transition-colors fade-in">
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        ${sub.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <span class="font-medium text-gray-900">${
+                      sub.fullName
+                    }</span>
+                </div>
+            </td>
+            <td class="px-6 py-4 text-gray-600">
+                ${sub.phone}
+            </td>
+            <td class="px-6 py-4">
+                ${sub.email}
+            </td>
+            <td class="px-6 py-4 text-gray-600">
+                ${new Date(sub.date).toLocaleDateString("he-IL", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+            </td>
+            <td class="px-6 py-4">
+                <span class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    ${sub.status || "פעיל"}
+                </span>
+            </td>
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                    <button onclick="editSubscriber('${sub.email}')" 
+                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors !rounded-button"
+                            title="עריכה">
+                        <i class="ri-edit-line"></i>
+                    </button>
+                    <button onclick="showDeleteModal('${sub.email}')" 
+                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors !rounded-button"
+                            title="מחיקה">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `
             )
             .join("");
         }
