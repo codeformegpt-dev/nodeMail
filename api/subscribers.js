@@ -1,4 +1,4 @@
-import { readSubscribers, addSubscriber, deleteSubscriber } from '../db/subscribers.js';
+import { readSubscribers, addSubscriber, deleteSubscriber } from '../backend/db/subscribers.js';
 
 export default async function handler(req, res) {
   try {

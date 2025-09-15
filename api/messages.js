@@ -1,4 +1,4 @@
-import { readMessages, addMessage } from '../db/messages.js';
+import { readMessages, addMessage } from '../backend/db/messages.js';
 import { readSubscribers } from '../db/subscribers.js';
 import { sendMail } from '../services/mailer.js';
 
