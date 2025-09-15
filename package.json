@@ -4,6 +4,7 @@
   "description": "Local email subscription project",
   "type": "module",
   "dependencies": {
+    "@vercel/speed-insights": "^1.2.0",
     "better-sqlite3": "^12.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -16,4 +17,3 @@
     "live-server": "^1.2.2"
   }
 }
-
