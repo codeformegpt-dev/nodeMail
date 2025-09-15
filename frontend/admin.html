@@ -1009,20 +1009,24 @@
       async function sendMessage(formData) {
         try {
           showLoading();
+
           const res = await fetch(`${API_URL}/messages`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),
           });
 
-          if (!res.ok) throw new Error("שגיאה בשליחת ההודעה");
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || "שגיאה בשליחת ההודעה");
+          }
 
           showAlert("ההודעה נשלחה בהצלחה לכל המנויים", "success");
           document.getElementById("messageForm").reset();
-          hideLoading();
         } catch (err) {
-          hideLoading();
           showAlert(err.message, "error");
+        } finally {
+          hideLoading();
         }
       }
 
