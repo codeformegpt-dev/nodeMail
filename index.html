@@ -317,93 +317,96 @@ fadeElements.forEach(el => observer.observe(el));
 });
 </script>
 <script id="form-handling">
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById("contactForm");
-    const result = document.getElementById("result");
-    const submitButton = form.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.textContent;
+const form = document.getElementById("contactForm");
+const submitButton = document.getElementById('button[type="submit"]');
+const result = document.getElementById("result");
+const originalButtonText = submitButton.textContent;
 
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
+form.addEventListener("submit", async function(e) {
+    e.preventDefault();
 
-        const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
+    if (!email) return;
 
-        submitButton.classList.add('loading'); // מוסיף אנימציה של טעינה
-        submitButton.textContent = '';
-        submitButton.disabled = true;
+    // מצב טעינה
+    submitButton.classList.add('loading');
+    submitButton.textContent = '';
+    submitButton.disabled = true;
+    result.innerHTML = '';
 
-        result.innerHTML = '';
+    try {
+        // שולחים את המייל למסד הנתונים והבקאנד שולח מייל אוטומטית
+        const response = await fetch('/api/subscribers', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
 
-        try {
-            const response = await fetch('/api/sendMail', {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email })
-            });
+        const data = await response.json();
 
-            const data = await response.json();
+        // זמן טעינה מינימלי כדי לראות אנימציה
+        setTimeout(() => {
+            submitButton.classList.remove('loading');
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
 
-            setTimeout(() => {
-                submitButton.classList.remove('loading');
-                submitButton.textContent = originalButtonText;
-                submitButton.disabled = false;
-
-                if (response.ok) {
-                    result.innerHTML = `
-                        <div class="success-message">
-                            <div class="flex items-center justify-center mb-2">
-                                <i class="ri-check-circle-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
-                                <span class="font-semibold">נרשמתם בהצלחה!</span>
-                            </div>
-                            <p>הסרטונים נשלחו למייל שלכם. בדקו גם בתיקיית הספאם.</p>
+            if (response.ok) {
+                result.innerHTML = `
+                    <div class="success-message">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="ri-check-circle-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                            <span class="font-semibold">נרשמתם בהצלחה!</span>
                         </div>
-                    `;
-                    form.reset();
-                } else {
-                    result.innerHTML = `
-                        <div class="error-message">
-                            <div class="flex items-center justify-center mb-2">
-                                <i class="ri-error-warning-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
-                                <span class="font-semibold">שגיאה</span>
-                            </div>
-                            <p>${data.error || 'אירעה שגיאה, אנא נסו שוב'}</p>
-                        </div>
-                    `;
-                }
-
-                setTimeout(() => {
-                    const messageElement = result.querySelector('.success-message, .error-message');
-                    if (messageElement) messageElement.classList.add('show');
-                }, 100);
-
-            }, 1500);
-
-        } catch (err) {
-            setTimeout(() => {
-                submitButton.classList.remove('loading');
-                submitButton.textContent = originalButtonText;
-                submitButton.disabled = false;
-
+                        <p>הסרטונים נשלחו למייל שלכם. בדקו גם בתיקיית הספאם.</p>
+                    </div>
+                `;
+                form.reset();
+            } else {
                 result.innerHTML = `
                     <div class="error-message">
                         <div class="flex items-center justify-center mb-2">
-                            <i class="ri-wifi-off-line text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
-                            <span class="font-semibold">שגיאת רשת</span>
+                            <i class="ri-error-warning-fill text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                            <span class="font-semibold">שגיאה</span>
                         </div>
-                        <p>בדקו את החיבור לאינטרנט ונסו שוב</p>
+                        <p>${data.error || 'אירעה שגיאה, אנא נסו שוב'}</p>
                     </div>
                 `;
+            }
 
-                setTimeout(() => {
-                    const messageElement = result.querySelector('.error-message');
-                    if (messageElement) messageElement.classList.add('show');
-                }, 100);
+            // אנימציה של הופעה
+            setTimeout(() => {
+                const messageElement = result.querySelector('.success-message, .error-message');
+                if (messageElement) messageElement.classList.add('show');
+            }, 100);
 
-            }, 1500);
-        }
-    });
+        }, 800); // ניתן לשנות את משך האנימציה
+
+    } catch (err) {
+        setTimeout(() => {
+            submitButton.classList.remove('loading');
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
+
+            result.innerHTML = `
+                <div class="error-message">
+                    <div class="flex items-center justify-center mb-2">
+                        <i class="ri-wifi-off-line text-2xl ml-2 w-6 h-6 flex items-center justify-center"></i>
+                        <span class="font-semibold">שגיאת רשת</span>
+                    </div>
+                    <p>בדקו את החיבור לאינטרנט ונסו שוב</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const messageElement = result.querySelector('.error-message');
+                if (messageElement) messageElement.classList.add('show');
+            }, 100);
+
+        }, 800);
+    }
 });
 </script>
+
 
 <script id="smooth-scroll">
 document.addEventListener('DOMContentLoaded', function() {
