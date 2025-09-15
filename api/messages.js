@@ -1,6 +1,6 @@
 import { readMessages, addMessage } from '../backend/db/messages.js';
-import { readSubscribers } from '../db/subscribers.js';
-import { sendMail } from '../services/mailer.js';
+import { readSubscribers } from '../backend/db/subscribers.js';
+import { sendMail } from '../backend/services/mailer.js';
 
 export default async function handler(req, res) {
   try {
