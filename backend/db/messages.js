@@ -1,4 +1,4 @@
-import pool from './pool.js'; // חיבור למסד PostgreSQL
+import pool from './connection.js'; // חיבור למסד PostgreSQL
 
 export async function addMessage(subject, text) {
   await pool.query(
